@@ -15,7 +15,17 @@
   <meta property="article:author" content="Ernesto Barrera">
   <!-- fin -->
   <title>Buscador | Trabajo</title>
-
+  <script>
+    function redirectBasedOnDevice() {
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            // Redirige a la versión móvil
+            window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc.html";
+        } else {
+            // Redirige a la versión de escritorio
+            window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc2.html";
+        }
+    }
+</script>
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/reset.css" />
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/reveal.css" />
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/theme/blood.css" id="theme" />
@@ -63,7 +73,7 @@
     gtag('config', 'G-YFKR6RB1ZC');
   </script>
 </head>
-<body>
+<body onload="redirectBasedOnDevice()">
   <div class="reveal">
     <div class="slides">
       <section data-background-opacity="0.2" data-background-image="./instalacionPC.gif">
