@@ -15,20 +15,43 @@
   <meta property="article:author" content="Ernesto Barrera">
   <!-- fin -->
   <title>Buscador | Trabajo</title>
-<script>
-  function redirectBasedOnDevice() {
-      // Verifica si la URL ya contiene el parámetro 'redirected'
-      if (window.location.search.indexOf('redirected') === -1) {
-          if (window.matchMedia("(max-width: 768px)").matches) {
-              // Redirige a la versión móvil con el parámetro 'redirected' agregado
-              window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc.html?redirected=true";
-          } else {
-              // Redirige a la versión de escritorio con el parámetro 'redirected' agregado
-              window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc2.html?redirected=true";
+  <!DOCTYPE html>
+  <html lang="es">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Redirección según el dispositivo</title>
+      <script>
+          function isMobile() {
+              // Verifica el ancho de la pantalla
+              const isMobileScreen = window.matchMedia("(max-width: 768px)").matches;
+              
+              // Verifica el agente de usuario
+              const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+              const isMobileAgent = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
+  
+              return isMobileScreen || isMobileAgent;
           }
-      }
-  }
-</script>
+  
+          function redirectBasedOnDevice() {
+              // Verifica si la URL ya contiene el parámetro 'redirected'
+              if (window.location.search.indexOf('redirected=true') === -1) {
+                  if (isMobile()) {
+                      // Redirige a la versión móvil con el parámetro 'redirected' agregado
+                      window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc.html?redirected=true";
+                  } else {
+                      // Redirige a la versión de escritorio con el parámetro 'redirected' agregado
+                      window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc2.html?redirected=true";
+                  }
+              }
+          }
+      </script>
+  </head>
+  <body onload="redirectBasedOnDevice()">
+      <p>Redirigiendo...</p>
+  </body>
+  </html>
+  
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/reset.css" />
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/reveal.css" />
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/theme/blood.css" id="theme" />
