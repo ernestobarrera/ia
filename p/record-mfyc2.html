@@ -17,15 +17,18 @@
   <title>Buscador | Trabajo</title>
   <script>
     function redirectBasedOnDevice() {
-        if (window.matchMedia("(max-width: 768px)").matches) {
-            // Redirige a la versión móvil
-            window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc.html";
-        } else {
-            // Redirige a la versión de escritorio
-            window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc2.html";
+        // Verifica si la URL ya contiene el parámetro 'redirected'
+        if (window.location.search.indexOf('redirected') === -1) {
+            if (window.matchMedia("(max-width: 768px)").matches) {
+                // Redirige a la versión móvil con el parámetro 'redirected' agregado
+                window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc.html?redirected=true";
+            } else {
+                // Redirige a la versión de escritorio con el parámetro 'redirected' agregado
+                window.location.href = "https://ernestobarrera.github.io/ia/p/record-mfyc2.html?redirected=true";
+            }
         }
     }
-</script>
+  </script>
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/reset.css" />
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/reveal.css" />
   <link rel="stylesheet" href="https://ernestobarrera.github.io/t/reveal.js/dist/theme/blood.css" id="theme" />
