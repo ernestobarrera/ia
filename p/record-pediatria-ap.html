@@ -180,7 +180,92 @@
         max-width: 840px;
         text-wrap: balance;
       }
+      .author-card {
+        margin: 22px auto 0;
+        width: min(620px, 100%);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.28);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+        backdrop-filter: blur(8px);
+        padding: 14px 16px;
+      }
 
+      .author-card-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .author-card-avatar {
+        width: 56px;
+        height: 62px;
+        flex: 0 0 auto;
+        object-fit: contain;
+      }
+
+      .author-card-name {
+        margin: 0;
+        color: var(--accent);
+        font-size: clamp(1.05rem, 2vw, 1.35rem);
+        line-height: 1.15;
+      }
+
+      .author-card-links {
+        margin: 4px 0 0;
+        line-height: 1.2;
+        font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+      }
+
+      .author-card-links a {
+        text-decoration: none;
+        margin-right: 10px;
+      }
+
+      .author-card-links a:hover,
+      .author-card-links a:focus-visible {
+        text-decoration: underline;
+        outline: none;
+      }
+
+      .author-card-date {
+        display: block;
+        margin-top: 5px;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      .author-card-links .x {
+        color: #1da1f2;
+      }
+
+      .author-card-links .gh {
+        color: #f1f5f9;
+      }
+
+      .author-card-links .li {
+        color: #0a9cff;
+      }
+
+      @media (max-width: 560px) {
+        .author-card {
+          padding: 12px 12px;
+        }
+
+        .author-card-inner {
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .author-card-avatar {
+          width: 48px;
+          height: 54px;
+        }
+
+        .author-card-links a {
+          margin-right: 8px;
+        }
+      }
       @media (max-width: 760px) {
         .content {
           padding: 30px 16px 26px;
@@ -233,9 +318,30 @@
             En dispositivos móviles, pulsa el botón.<br />
             Si la barra no está visible, actívala con <strong>Ctrl + Mayús + B</strong>.
           </p>
+        
+          <aside class="author-card" aria-label="Autoría de la página">
+            <div class="author-card-inner">
+              <img
+                class="author-card-avatar"
+                src="https://ernestobarrera.github.io/assets/images/avatar_cabecera.png"
+                alt="Avatar de Ernesto Barrera"
+              />
+              <div>
+                <p class="author-card-name">Autor: Ernesto Barrera</p>
+                <p class="author-card-links">
+                  <a class="x" href="https://twitter.com/ernestob" target="_blank" rel="noopener noreferrer">Twitter</a>
+                  <a class="gh" href="https://github.com/ernestobarrera" target="_blank" rel="noopener noreferrer">GitHub</a>
+                  <a class="li" href="https://linkedin.com/in/ernestobarreralinares" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                  <span class="author-card-date">22 de febrero de 2026</span>
+                </p>
+              </div>
+            </div>
+          </aside>
         </section>
       </div>
     </main>
   </body>
 </html>
+
+
 
