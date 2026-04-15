@@ -1,0 +1,828 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Generador de prompts RECORD para Inspección Sanitaria" />
+    <meta name="author" content="Ernesto Barrera" />
+    <title>RECORD Inspección Sanitaria | Generador de Prompts</title>
+    <style>
+      :root {
+        --primary: #60a5fa;
+        --secondary: #34d399;
+        --accent: #fbbf24;
+        --bg-1: #0f172a;
+        --bg-2: #1e293b;
+        --panel: rgba(15, 23, 42, 0.82);
+        --panel-border: rgba(255, 255, 255, 0.12);
+        --text-main: #f8fafc;
+        --text-muted: #cbd5e1;
+        --shadow: 0 24px 60px rgba(2, 6, 23, 0.45);
+        --radius-xl: 22px;
+        --radius-lg: 14px;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        font-family: "Outfit", "Segoe UI", system-ui, sans-serif;
+        color: var(--text-main);
+        background:
+          radial-gradient(circle at 18% 18%, rgba(96,165,250,.22), transparent 40%),
+          radial-gradient(circle at 82% 12%, rgba(52,211,153,.16), transparent 42%),
+          radial-gradient(circle at 65% 78%, rgba(251,191,36,.12), transparent 44%),
+          linear-gradient(145deg, var(--bg-1), var(--bg-2));
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        min-height: 100vh;
+      }
+      .shell {
+        width: min(980px, 100%);
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--panel-border);
+        background: linear-gradient(180deg, rgba(30,41,59,.75), rgba(15,23,42,.85));
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+        position: relative;
+      }
+      .shell::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(120deg, rgba(96,165,250,.08), transparent 35%),
+          linear-gradient(320deg, rgba(52,211,153,.08), transparent 35%);
+      }
+      .content {
+        position: relative;
+        z-index: 1;
+        padding: 52px 34px 44px;
+        min-height: min(760px, 86vh);
+        display: grid;
+        align-content: center;
+      }
+      .title {
+        margin: 0;
+        text-align: center;
+        line-height: 1.1;
+        font-size: clamp(1.9rem, 4.5vw, 3rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .title .gradient {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .subtitle {
+        margin: 16px auto 0;
+        text-align: center;
+        color: var(--text-muted);
+        max-width: 800px;
+        font-size: clamp(1rem, 1.9vw, 1.25rem);
+        line-height: 1.5;
+      }
+      .bookmarklet-zone {
+        margin: 40px auto 10px;
+        display: grid;
+        place-items: center;
+        gap: 18px;
+      }
+      .bookmarklet-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        color: #081018;
+        background: linear-gradient(135deg, var(--accent), #f59e0b);
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 999px;
+        padding: 16px 28px;
+        min-height: 64px;
+        min-width: min(640px, 94vw);
+        font-size: clamp(1.1rem, 2.3vw, 1.45rem);
+        font-weight: 700;
+        box-shadow: 0 14px 28px rgba(245,158,11,.22), inset 0 1px 0 rgba(255,255,255,.35);
+        transition: transform .12s ease, box-shadow .12s ease;
+        text-align: center;
+        cursor: pointer;
+      }
+      .bookmarklet-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px rgba(245,158,11,.28), inset 0 1px 0 rgba(255,255,255,.4);
+      }
+      .bookmarklet-button .icon {
+        width: 2rem; height: 2rem;
+        border-radius: 999px;
+        display: inline-grid;
+        place-items: center;
+        background: rgba(8,16,24,.16);
+        font-size: 1rem;
+        flex: 0 0 auto;
+      }
+      .install-note {
+        margin: 0;
+        text-align: center;
+        font-size: clamp(.9rem, 1.6vw, 1.1rem);
+        color: var(--text-muted);
+        line-height: 1.5;
+        max-width: 760px;
+      }
+      .feature-grid {
+        margin: 32px auto 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 14px;
+        width: min(820px, 100%);
+      }
+      .feature-card {
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.07);
+        background: rgba(255,255,255,.03);
+        padding: 14px 16px;
+      }
+      .feature-card-title {
+        margin: 0 0 6px;
+        color: var(--accent);
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .feature-card-text {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: .92rem;
+        line-height: 1.5;
+      }
+      .privacy-card {
+        margin: 16px auto 0;
+        width: min(820px, 100%);
+        border-radius: 14px;
+        border: 1px solid rgba(251,191,36,.24);
+        background: rgba(251,191,36,.08);
+        padding: 12px 16px;
+      }
+      .privacy-card-title {
+        margin: 0 0 4px;
+        color: var(--accent);
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+      }
+      .privacy-card-text {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: .92rem;
+        line-height: 1.45;
+      }
+      .author-card {
+        margin: 24px auto 0;
+        width: min(600px, 100%);
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.09);
+        background: rgba(0,0,0,.25);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .author-card img { width: 44px; height: 50px; object-fit: contain; flex: 0 0 auto; }
+      .author-card-name { margin: 0; color: var(--accent); font-size: 1rem; font-weight: 600; }
+      .author-card-links { margin: 3px 0 0; font-size: .9rem; }
+      .author-card-links a { text-decoration: none; margin-right: 10px; }
+      .author-card-links a:hover { text-decoration: underline; }
+      .author-card-links .x { color: #1da1f2; }
+      .author-card-links .gh { color: #f1f5f9; }
+      .author-card-links .li { color: #0a9cff; }
+      .citation-card {
+        margin: 14px auto 0;
+        width: min(600px, 100%);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.07);
+        background: rgba(255,255,255,.02);
+        padding: 10px 14px;
+      }
+      .citation-card p { margin: 0; color: var(--text-muted); font-size: .88rem; line-height: 1.45; }
+      .citation-card cite { color: var(--text-main); font-style: italic; }
+      .citation-card a { color: #93c5fd; text-decoration: none; }
+      .citation-card a:hover { text-decoration: underline; }
+      @media (max-width: 600px) {
+        .content { padding: 30px 16px 28px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell" aria-labelledby="page-title">
+      <div class="content">
+        <h1 id="page-title" class="title">
+          IA en Inspección Sanitaria<br />
+          <span class="gradient">Generador de Prompts RECORD</span>
+        </h1>
+        <p class="subtitle">
+          30 casos de apoyo documental para inspectores sanitarios<br />
+          Marco R-E-C-O-R-D · Hover para previsualizar · Clic abre el wizard
+        </p>
+
+        <div class="bookmarklet-zone">
+          <a id="bookmarklet-link" class="bookmarklet-button" href="#">
+            <span class="icon">&#128269;</span>
+            <span>Abrir panel · 30 casos de inspección</span>
+          </a>
+          <p class="install-note">
+            También puedes arrastrar este botón a la barra de marcadores para usarlo en cualquier página web.
+          </p>
+        </div>
+
+        <aside class="privacy-card" aria-label="Uso seguro de datos">
+          <p class="privacy-card-title">Uso seguro</p>
+          <p class="privacy-card-text">
+            No pegues datos personales, historia clínica identificable, códigos internos ni combinaciones que permitan reconocer a una persona o centro. Usa datos anonimizados, mínimos y, cuando estés practicando, ejemplos sintéticos.
+          </p>
+        </aside>
+
+        <div class="feature-grid" aria-hidden="true">
+          <div class="feature-card">
+            <p class="feature-card-title">7 áreas de inspección</p>
+            <p class="feature-card-text">IT · Visado · Responsabilidad patrimonial · Centros · Ordenación farmacéutica · Salud pública · Auditoría</p>
+          </div>
+          <div class="feature-card">
+            <p class="feature-card-title">Estructura RECORD</p>
+            <p class="feature-card-text">Cada caso incluye Rol, Escenario, Condición, Output, Restricción y Decisión del inspector. Hover para ver el esquema.</p>
+          </div>
+          <div class="feature-card">
+            <p class="feature-card-title">Prompts listos</p>
+            <p class="feature-card-text">Pegables en Claude, ChatGPT o Gemini. No requieren expedientes reales: puedes trabajar con ejemplos sintéticos o datos anonimizados mínimos.</p>
+          </div>
+          <div class="feature-card">
+            <p class="feature-card-title">Tono profesional</p>
+            <p class="feature-card-text">Vocabulario técnico-jurídico. La IA apoya la documentación; el inspector emite criterio, visado y propuesta de resolución.</p>
+          </div>
+        </div>
+
+        <aside class="author-card" aria-label="Autoría">
+          <img src="https://ernestobarrera.github.io/assets/images/avatar_cabecera.png" alt="Avatar de Ernesto Barrera" />
+          <div>
+            <p class="author-card-name">Ernesto Barrera</p>
+            <p class="author-card-links">
+              <a class="x" href="https://twitter.com/ernestob" target="_blank" rel="noopener">Twitter</a>
+              <a class="gh" href="https://github.com/ernestobarrera" target="_blank" rel="noopener">GitHub</a>
+              <a class="li" href="https://linkedin.com/in/ernestobarreralinares" target="_blank" rel="noopener">LinkedIn</a>
+            </p>
+          </div>
+        </aside>
+
+        <aside class="citation-card" aria-label="Referencia">
+          <p>
+            Barrera-Linares, E. (2025).
+            <cite>Método RECORD para escribir Prompts en ChatGPT</cite>. Zenodo.
+            <a href="https://doi.org/10.5281/zenodo.16813419" target="_blank" rel="noopener">https://doi.org/10.5281/zenodo.16813419</a>
+          </p>
+        </aside>
+      </div>
+    </main>
+
+    <script>
+      function openInspeccionPanel() {
+        var PID = 'ia-insp-panel', SID = 'ia-insp-style', TID = 'ia-insp-tip', TSID = 'ia-insp-toast';
+        var CHAT_URL = 'https://chat.openai.com/?model=gpt-4o&q=';
+        var WID = 'ia-insp-wizard', WDLG = 'ia-insp-wizard-dialog';
+        var activeWizard = null, selectedText = getSelectedText();
+        if (document.getElementById(PID)) { document.getElementById(PID).remove(); document.getElementById(SID) && document.getElementById(SID).remove(); return; }
+
+        var CATS = [
+          { name: 'Incapacidad Temporal (IT)', cases: [
+            { n:1, title:'Cronología de proceso IT desde documentación dispersa',
+              rec:{ R:'Asistente documental de apoyo al inspector sanitario', E:'Expediente de IT con partes, informes y comunicaciones dispersas', C:'Trazabilidad al documento fuente en cada entrada de la cronología', O:'Tabla: Fecha · Tipo de documento · Emisor · Contenido · Observaciones', Rx:'No emite valoración clínica ni juicio sobre la procedencia de la baja', D:'El inspector decide las actuaciones de seguimiento en el expediente' }
+            },
+            { n:2, title:'Detección de omisiones o incongruencias en partes de IT',
+              rec:{ R:'Asistente de revisión documental para inspección sanitaria médica', E:'Conjunto de partes de baja, confirmación y alta de un proceso de IT', C:'Identificación objetiva de incidencias sin valorar la actuación del facultativo', O:'Lista estructurada de incidencias: tipo · documento · campo específico', Rx:'No concluye sobre la procedencia de la IT ni sobre la actuación del facultativo', D:'El inspector valora cada incidencia y decide actuaciones en el expediente' }
+            },
+            { n:3, title:'Preparación de datos para control ITWeb',
+              rec:{ R:'Asistente de organización documental', E:'Supuesto anonimizado de procesos de IT para preparar una revisión previa a ITWeb', C:'Campos funcionales sin NIF, CIP, nombres, fechas exactas innecesarias ni combinaciones reconocibles', O:'Tabla Markdown: caso anonimizado · fecha relativa · contingencia · duración · documentación disponible · dato pendiente', Rx:'No valida ni introduce datos en ITWeb; no solicita identificadores ni valora la procedencia de la IT', D:'El inspector valida la tabla con la documentación oficial y realiza las actuaciones en ITWeb' }
+            },
+            { n:4, title:'Borrador de propuesta de seguimiento de IT prolongada',
+              rec:{ R:'Asistente redactor de documentación técnica de inspección sanitaria', E:'Expediente de IT de larga duración con partes, informes y evolución clínica', C:'Borrador con estructura estándar de propuesta de seguimiento; revisable por el inspector', O:'Borrador: relación de hechos · hallazgos · consideraciones técnicas · propuesta de actuaciones', Rx:'No valora si debe continuar o finalizarse la IT; no menciona conductas personales', D:'El inspector revisa, completa con su criterio y decide las actuaciones a proponer' }
+            }
+          ]},
+          { name: 'Visado farmacéutico', cases: [
+            { n:5, title:'Checklist de criterios de visado para medicamento concreto',
+              rec:{ R:'Asistente de documentación técnica y normativa para inspección farmacéutica', E:'Expediente de visado de un medicamento o grupo terapéutico específico', C:'Checklist con referencia normativa por criterio; formato verificable con casillas', O:'Tabla Markdown: indicaciones · documentación · condiciones especiales · plazos · denegación', Rx:'No propone resolución ni anticipa si el visado debe concederse o denegarse', D:'El inspector usa el checklist como apoyo y adopta la propuesta de resolución del expediente' }
+            },
+            { n:6, title:'Comparación prescripción vs. criterios de visado vigentes',
+              rec:{ R:'Asistente comparador de documentación clínica y normativa', E:'Prescripción presentada para visado + criterios de visado del medicamento', C:'Trazabilidad entre cada criterio y el dato clínico que lo acredita o no', O:'Tabla tres columnas: Criterio · Estado (CUMPLE/NO ACREDITADO/AUSENTE) · Observación', Rx:'No propone resolución ni anticipa si el visado debe concederse o denegarse', D:'El inspector adopta la propuesta de resolución del expediente de visado' }
+            },
+            { n:7, title:'Extracción de datos clave del expediente de visado',
+              rec:{ R:'Asistente de extracción documental para inspección farmacéutica', E:'Expediente de visado con receta, informe clínico y documentación adjunta', C:'Extracción estructurada sin modificar ni interpretar los datos fuente', O:'Ficha: medicamento · indicación · prescriptor · documentación clínica aportada · tratamientos previos', Rx:'No valora la adecuación clínica de la prescripción ni propone resolución', D:'El inspector valida la extracción e instruye el expediente de visado' }
+            },
+            { n:8, title:'Borrador de informe de resolución de visado (revisable)',
+              rec:{ R:'Asistente redactor de documentación técnica de inspección farmacéutica', E:'Expediente de visado completo con documentación clínica y criterios aplicables', C:'Borrador con secciones estándar del informe de resolución; trazabilidad obligatoria', O:'Borrador: relación de hechos · consideraciones técnicas · hallazgos · propuesta de resolución', Rx:'No emite resolución definitiva; no decide si conceder o denegar el visado', D:'El inspector revisa, visa y firma el informe antes de su incorporación al expediente' }
+            }
+          ]},
+          { name: 'Responsabilidad patrimonial', cases: [
+            { n:9, title:'Cronología clínica desde historia y documentación del expediente',
+              rec:{ R:'Asistente de organización documental para expediente de responsabilidad patrimonial', E:'Historia clínica, informes, pruebas diagnósticas y altas de un expediente de RP', C:'Trazabilidad al documento fuente; sin valoración de la actuación asistencial', O:'Tabla: Fecha/hora · Episodio · Centro · Profesional · Contenido clínico · Observaciones', Rx:'No valora la actuación de los profesionales ni la adecuación de la asistencia prestada', D:'El inspector elabora las consideraciones técnicas e instruye el expediente de RP' }
+            },
+            { n:10, title:'Síntesis de documentación clínica dispersa',
+              rec:{ R:'Asistente sintetizador documental para inspección sanitaria', E:'Documentación clínica dispersa de un expediente de responsabilidad patrimonial', C:'Síntesis objetiva sin interpretación clínica; trazabilidad obligatoria al documento fuente', O:'Documento estructurado: antecedentes · reclamación · episodio · pruebas · tratamiento · evolución', Rx:'No emite juicio sobre la calidad asistencial ni sobre causalidad entre actuación y daño', D:'El inspector elabora las consideraciones técnicas y la propuesta de resolución' }
+            },
+            { n:11, title:'Preparación de datos por secciones para el informe de praxis',
+              rec:{ R:'Asistente de apoyo documental para elaboración del informe técnico de praxis', E:'Expediente de responsabilidad patrimonial con documentación clínica completa o parcial', C:'Datos organizados por secciones estándar del informe; datos ausentes señalados', O:'Borrador seccional: relación de hechos · documentación · diagnósticos · procedimientos · datos para consideraciones', Rx:'Las consideraciones técnicas y la propuesta de resolución corresponden al inspector', D:'El inspector revisa y redacta las consideraciones técnicas con su criterio profesional' }
+            },
+            { n:12, title:'Búsqueda bibliográfica contrastada del estándar asistencial',
+              rec:{ R:'Asistente de documentación científica para inspección sanitaria', E:'Supuesto clínico de un expediente de RP; necesidad de identificar el estándar asistencial', C:'Referencias bibliográficas verificables; distinción entre guías clínicas y estudios primarios', O:'Síntesis de evidencia con referencias: diagnóstico · tratamiento · derivación · seguimiento', Rx:'No aplica la evidencia al caso concreto ni emite valoración sobre la asistencia prestada', D:'El inspector valora la aplicabilidad al caso y elabora las consideraciones técnicas' }
+            },
+            { n:13, title:'Borrador de consideraciones técnicas revisables',
+              rec:{ R:'Asistente redactor de documentación técnica para expediente de responsabilidad patrimonial', E:'Síntesis clínica del caso + evidencia bibliográfica del estándar asistencial ya elaboradas', C:'Borrador estructurado con trazabilidad estricta al documento fuente y a la bibliografía', O:'Borrador: proceso documentado · comparación con estándares · aspectos a valorar · información pendiente', Rx:'No establece relación causal, no cuantifica daño, no identifica responsabilidad personal', D:'El inspector revisa, completa, añade su criterio técnico y firma las consideraciones' }
+            }
+          ]},
+          { name: 'Inspección de centros', cases: [
+            { n:14, title:'Checklist de requisitos técnico-sanitarios aplicables',
+              rec:{ R:'Asistente de documentación normativa para inspección de centros sanitarios', E:'Tipo de centro sanitario; autorización de apertura, renovación o inspección de oficio', C:'Checklist verificable con referencia normativa por área y requisito', O:'Tabla Markdown con casillas: planta física · personal · equipamiento · documentación · requisitos específicos', Rx:'No valora el cumplimiento del centro concreto ni propone actuaciones', D:'El inspector adapta el checklist y decide las actuaciones derivadas de los hallazgos del acta' }
+            },
+            { n:15, title:'Reorganización de hallazgos del acta por tema y gravedad',
+              rec:{ R:'Asistente de organización documental de hallazgos de inspección', E:'Acta o relación de hallazgos de una inspección de centro sanitario', C:'Redacción original de cada hallazgo sin interpretación; clasificación normativa fundada', O:'Tabla: hallazgo · área · norma incumplida · gravedad propuesta · observaciones', Rx:'No propone sanción, medida cautelar ni actuación concreta', D:'El inspector ajusta la clasificación, propone resolución y adopta medidas si procede' }
+            },
+            { n:16, title:'Comparación declaración responsable vs. requisitos normativos',
+              rec:{ R:'Asistente de análisis documental para planificación de la visita de inspección', E:'Declaración responsable del titular del centro + normativa técnico-sanitaria aplicable', C:'Comparación objetiva que señala lo verificable solo in situ; sin valorar cumplimiento real', O:'Tabla: requisito normativo · declarado por titular · estado (ACREDITADO/NO DECLARADO/INCOMPLETO/VERIFICACIÓN IN SITU)', Rx:'No determina si el centro cumple los requisitos; no propone resolución', D:'El inspector planifica la visita de inspección y adopta las decisiones procedentes' }
+            },
+            { n:17, title:'Borrador de plan de corrección de deficiencias detectadas',
+              rec:{ R:'Asistente redactor de propuesta de corrección de deficiencias de inspección de centros', E:'Hallazgos clasificados por área y gravedad de una inspección de centro sanitario', C:'Borrador revisable con estructura estándar de propuesta de resolución; sin sanción implícita', O:'Tabla por deficiencia: descripción · norma · medida correctora · plazo orientativo · documentación acreditativa', Rx:'No propone sanción; los plazos son orientativos según normativa; no es resolución definitiva', D:'El inspector revisa, modifica y firma el plan antes de su incorporación al expediente' }
+            }
+          ]},
+          { name: 'Ordenación farmacéutica', cases: [
+            { n:18, title:'Revisión de documentación para autorización de oficina de farmacia',
+              rec:{ R:'Asistente de revisión documental para tramitación de expedientes farmacéuticos', E:'Documentación presentada para solicitud de autorización de oficina de farmacia', C:'Revisión formal y de completitud con referencia normativa por requisito', O:'Tabla: documento requerido · estado (APORTADO/AUSENTE/INCOMPLETO) · observaciones', Rx:'No emite juicio sobre la idoneidad del solicitante ni sobre la procedencia de la autorización', D:'El inspector adopta la decisión sobre admisión a trámite y requerimientos de subsanación' }
+            },
+            { n:19, title:'Detección de desviaciones en prescripción y dispensación',
+              rec:{ R:'Asistente de análisis documental para control de prescripción y dispensación farmacéutica', E:'Registros o informes de prescripción-dispensación de un periodo definido', C:'Análisis de patrones agregados sin identificar prescriptores individuales', O:'Tabla estructurada por tipo de desviación: patrón · grupo terapéutico · magnitud · observaciones', Rx:'No identifica ni enjuicia a prescriptores individuales; no concluye sobre irregularidad', D:'El inspector valora si proceden actuaciones de seguimiento o apertura de expediente' }
+            },
+            { n:20, title:'Organización de expediente de autorización de botiquín o depósito',
+              rec:{ R:'Asistente de organización documental para expedientes de ordenación farmacéutica', E:'Expediente de autorización de botiquín sanitario, depósito o servicio de farmacia de centro', C:'Esquema organizado por secciones del expediente; datos pendientes claramente señalados', O:'Borrador estructurado: titular · documentación técnica · responsable técnico · medicamentos · pendientes', Rx:'No evalúa la procedencia de la autorización; la decisión corresponde al inspector', D:'El inspector revisa el borrador y adopta la propuesta de resolución del expediente' }
+            },
+            { n:21, title:'Revisión de web de farmacia y venta a distancia',
+              rec:{ R:'Asistente de revisión documental para ordenación farmacéutica', E:'Capturas o contenidos de una web de oficina de farmacia, venta online o publicidad de servicios farmacéuticos', C:'Separar hechos observables, identificación del titular, condiciones de venta y enlaces verificables', O:'Tabla: elemento observado · requisito a comprobar · evidencia visible · riesgo · verificación pendiente', Rx:'No concluye infracción ni propone sanción; identifica puntos de comprobación documental', D:'El inspector contrasta normativa aplicable y decide actuaciones, requerimientos o visita' }
+            }
+          ]},
+          { name: 'Salud pública', cases: [
+            { n:22, title:'Extracción de datos de brote o alerta para informe técnico',
+              rec:{ R:'Asistente de organización documental para inspección de salud pública', E:'Partes, notificaciones e informes preliminares de un brote o alerta sanitaria', C:'Extracción estructurada sin conclusiones etiológicas en fase preliminar', O:'Ficha de brote: agente · casos · distribución temporal · fuente probable · medidas adoptadas · pendientes', Rx:'No establece conclusiones etiológicas ni atribución de responsabilidad', D:'El inspector elabora el informe técnico definitivo y adopta las medidas que correspondan' }
+            },
+            { n:23, title:'Checklist normativa de establecimiento alimentario o instalación de aguas',
+              rec:{ R:'Asistente de documentación normativa para inspección de salud pública', E:'Establecimiento alimentario, instalación de aguas de consumo, riesgo de legionela o piscina', C:'Checklist verificable con referencia normativa por área; orientado a la visita de inspección', O:'Tabla con casillas: requisitos estructurales · autocontrol (APPCC) · registros · formación · analíticas', Rx:'No valora el cumplimiento del establecimiento concreto antes de la visita', D:'El inspector adapta el checklist y decide actuaciones tras la inspección in situ' }
+            },
+            { n:24, title:'Resumen estructurado de actuaciones en gestión de alerta sanitaria',
+              rec:{ R:'Asistente de síntesis documental para cierre de alerta sanitaria', E:'Informes, comunicaciones, actas y registros de la gestión de una alerta sanitaria', C:'Resumen objetivo de actuaciones documentadas; trazabilidad obligatoria al documento fuente', O:'Cronología de actuaciones · comunicaciones · medidas adoptadas · estado · pendientes', Rx:'No emite valoración sobre la gestión de la alerta ni sobre el comportamiento de ninguna entidad', D:'El inspector elabora el informe final de gestión de la alerta sanitaria' }
+            },
+            { n:25, title:'Revisión documental de plan de control de legionella',
+              rec:{ R:'Asistente de comprobación documental para inspección de salud pública', E:'Plan sanitario, registros de mantenimiento, analíticas y actuaciones correctoras de una instalación con riesgo de legionella', C:'Trazabilidad a registros, fechas, puntos de muestreo e incidencias documentadas', O:'Matriz: requisito · evidencia aportada · fecha · desviación posible · verificación in situ', Rx:'No concluye cumplimiento global ni sustituye la inspección o la valoración analítica oficial', D:'El inspector verifica la instalación, solicita subsanaciones y adopta las medidas que correspondan' }
+            },
+            { n:26, title:'Publicidad alimentaria o declaraciones de salud',
+              rec:{ R:'Asistente de análisis documental para inspección de salud pública', E:'Etiqueta, folleto, web o pieza publicitaria con alegaciones nutricionales, saludables o de seguridad alimentaria', C:'Distinguir afirmaciones literales, soporte aportado, fuente normativa y población destinataria', O:'Tabla: afirmación · tipo de alegación · soporte visible · criterio a comprobar · riesgo comunicativo', Rx:'No declara publicidad engañosa ni propone sanción; señala verificaciones necesarias', D:'El inspector contrasta normativa y evidencia, y decide requerimientos o actuaciones' }
+            }
+          ]},
+          { name: 'Evaluación y auditoría', cases: [
+            { n:27, title:'Matriz de evaluación de criterios de auditoría hospitalaria',
+              rec:{ R:'Asistente de evaluación documental para auditoría hospitalaria', E:'Criterios o estándares de auditoría + documentación aportada por el hospital auditado', C:'Trazabilidad al documento fuente para cada criterio evaluado', O:'Matriz: criterio · estándar · evidencia documentada · grado de cumplimiento · hallazgos relevantes', Rx:'No emite conclusiones globales sobre la calidad del centro ni compara centros entre sí', D:'El inspector verifica in situ los aspectos necesarios y elabora el informe de auditoría definitivo' }
+            },
+            { n:28, title:'Organización de hallazgos de auditoría por área y prioridad',
+              rec:{ R:'Asistente de organización de hallazgos para cierre de auditoría sanitaria', E:'Relación de hallazgos identificados durante la auditoría de un centro o servicio', C:'Clasificación por área y prioridad con justificación; sin comparaciones entre servicios ni personas', O:'Tabla: hallazgo · área · criterio incumplido · prioridad · propuesta de mejora (borrador revisable)', Rx:'No establece ranking entre servicios ni entre profesionales; las propuestas de mejora son orientativas', D:'El inspector ajusta la priorización y elabora el informe de auditoría definitivo' }
+            },
+            { n:29, title:'Seguridad del paciente: incidentes y barreras',
+              rec:{ R:'Asistente de análisis documental para evaluación de seguridad del paciente', E:'Notificaciones de incidentes, actas de comisión, planes de mejora o informes de eventos adversos', C:'Agrupar hechos documentados por proceso, barrera fallida, medida propuesta y seguimiento', O:'Tabla: incidente · barrera afectada · evidencia · acción correctora · responsable · estado', Rx:'No atribuye culpa individual ni emite conclusiones punitivas; orienta a aprendizaje y verificación', D:'El inspector valora el sistema de seguridad y define actuaciones de seguimiento' }
+            },
+            { n:30, title:'PROA o acreditación docente: matriz de evidencias',
+              rec:{ R:'Asistente de evaluación documental para programas sanitarios', E:'Documentación de PROA, acreditación docente, biobanco o programa de calidad asistencial', C:'Comparar criterios del programa con evidencias aportadas y lagunas documentales', O:'Matriz: criterio · evidencia · responsable · periodicidad · brecha · comprobación recomendada', Rx:'No acredita ni desacredita el programa; no sustituye auditoría ni visita de evaluación', D:'El inspector o evaluador decide el grado de cumplimiento y las acciones necesarias' }
+            }
+          ]}
+        ];
+
+        // ── STYLES ─────────────────────────────────────────────────────────
+        var css = [
+          '#ia-insp-panel{position:fixed!important;inset:3vh 2vw!important;z-index:999999!important;display:grid!important;grid-template-rows:auto 1fr auto!important;background:#12182b!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:16px!important;box-shadow:0 28px 72px rgba(0,0,0,.6)!important;overflow:hidden!important;font-family:"Segoe UI",system-ui,sans-serif!important;color:#f1f5f9!important;max-height:94vh!important}',
+          '#ia-insp-hdr{padding:16px 20px 12px!important;background:linear-gradient(180deg,rgba(30,40,60,.95),rgba(18,24,43,.95))!important;border-bottom:1px solid rgba(255,255,255,.08)!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:12px!important;flex-shrink:0!important}',
+          '#ia-insp-hdr h2{margin:0!important;font-size:clamp(1rem,1.8vw,1.3rem)!important;font-weight:700!important;color:#f8fafc!important;line-height:1.2!important}',
+          '#ia-insp-hdr p{margin:4px 0 0!important;font-size:.82rem!important;color:#94a3b8!important}',
+          '#ia-insp-close{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important;color:#f1f5f9!important;border-radius:8px!important;padding:6px 12px!important;font-size:.82rem!important;cursor:pointer!important;white-space:nowrap!important;flex-shrink:0!important;transition:background .15s!important}',
+          '#ia-insp-close:hover{background:rgba(255,255,255,.15)!important}',
+          '#ia-insp-body{overflow-y:auto!important;padding:16px 18px!important;display:grid!important;grid-template-columns:repeat(auto-fill,minmax(240px,1fr))!important;gap:14px!important;align-content:start!important}',
+          '.ia-cat{break-inside:avoid!important}',
+          '.ia-cat-name{margin:0 0 8px!important;font-size:.78rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.06em!important;color:#fbbf24!important;padding-bottom:5px!important;border-bottom:1px solid rgba(251,191,36,.2)!important}',
+          '.ia-case-list{margin:0!important;padding:0!important;list-style:none!important}',
+          '.ia-case{padding:7px 10px!important;border-radius:8px!important;cursor:pointer!important;font-size:.85rem!important;line-height:1.35!important;color:#cbd5e1!important;transition:background .12s,color .12s!important;position:relative!important;display:flex!important;align-items:baseline!important;gap:7px!important;margin-bottom:3px!important}',
+          '.ia-case:hover{background:rgba(96,165,250,.14)!important;color:#f8fafc!important}',
+          '.ia-case-n{color:#60a5fa!important;font-weight:700!important;font-size:.78rem!important;min-width:18px!important;flex-shrink:0!important}',
+          '.ia-copied{background:rgba(52,211,153,.15)!important;color:#6ee7b7!important}',
+          '#ia-insp-foot{padding:10px 18px!important;border-top:1px solid rgba(255,255,255,.07)!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;background:rgba(12,17,30,.8)!important;flex-shrink:0!important}',
+          '#ia-insp-foot p{margin:0!important;font-size:.8rem!important;color:#64748b!important}',
+          '#ia-insp-close2{background:rgba(255,255,255,.07)!important;border:1px solid rgba(255,255,255,.1)!important;color:#94a3b8!important;border-radius:7px!important;padding:5px 11px!important;font-size:.8rem!important;cursor:pointer!important;transition:background .15s!important}',
+          '#ia-insp-close2:hover{background:rgba(255,255,255,.13)!important}',
+          '#ia-insp-tip{position:fixed!important;z-index:1000000!important;background:#1e2d45!important;border:1px solid rgba(96,165,250,.3)!important;border-radius:10px!important;padding:12px 14px!important;max-width:320px!important;min-width:260px!important;box-shadow:0 12px 32px rgba(0,0,0,.5)!important;display:none!important;pointer-events:none!important}',
+          '.ia-rec-row{display:grid!important;grid-template-columns:20px 1fr!important;gap:6px!important;margin-bottom:6px!important;font-size:.8rem!important;line-height:1.35!important;color:#cbd5e1!important;align-items:baseline!important}',
+          '.ia-rec-row:last-child{margin-bottom:0!important}',
+          '.ia-rec-l{font-weight:800!important;color:#60a5fa!important;font-size:.88rem!important}',
+          '#ia-insp-toast{position:fixed!important;bottom:24px!important;left:50%!important;transform:translateX(-50%)!important;background:#1e3a2f!important;border:1px solid #34d399!important;color:#6ee7b7!important;padding:8px 20px!important;border-radius:999px!important;font-size:.88rem!important;font-weight:600!important;z-index:1000001!important;opacity:0!important;transition:opacity .25s!important;pointer-events:none!important}',
+          '#ia-insp-wizard{position:fixed!important;inset:0!important;z-index:1000002!important;background:rgba(2,6,23,.64)!important;display:grid!important;place-items:center!important;padding:14px!important;backdrop-filter:blur(5px)!important}',
+          '#ia-insp-wizard-dialog{width:min(760px,96vw)!important;max-height:92vh!important;display:grid!important;grid-template-rows:auto auto 1fr auto!important;overflow:hidden!important;background:linear-gradient(180deg,rgba(15,23,42,.98),rgba(17,24,39,.98))!important;color:#f8fafc!important;border:1px solid rgba(255,255,255,.13)!important;border-radius:18px!important;box-shadow:0 30px 80px rgba(0,0,0,.58)!important;font-family:"Segoe UI",system-ui,sans-serif!important}',
+          '#ia-insp-wizard .w-head{padding:14px 16px 10px!important;border-bottom:1px solid rgba(255,255,255,.08)!important;background:linear-gradient(135deg,rgba(96,165,250,.12),rgba(52,211,153,.07))!important}',
+          '#ia-insp-wizard .w-case{margin:0 0 5px!important;color:#94a3b8!important;font-size:.78rem!important}',
+          '#ia-insp-wizard .w-title{margin:0!important;color:#f8fafc!important;font-size:1.05rem!important;line-height:1.25!important}',
+          '#ia-insp-wizard .w-prog{padding:10px 16px!important;border-bottom:1px solid rgba(255,255,255,.06)!important}',
+          '#ia-insp-wizard .pills{display:grid!important;grid-template-columns:repeat(6,1fr)!important;gap:6px!important;margin:0 0 8px!important}',
+          '#ia-insp-wizard .pill{border-radius:999px!important;border:1px solid rgba(255,255,255,.11)!important;background:rgba(255,255,255,.04)!important;color:#cbd5e1!important;text-align:center!important;font-weight:800!important;font-size:.72rem!important;padding:5px!important}',
+          '#ia-insp-wizard .pill.a{background:linear-gradient(135deg,#93c5fd,#34d399)!important;color:#081018!important}',
+          '#ia-insp-wizard .pill.d{background:rgba(52,211,153,.16)!important;color:#d1fae5!important}',
+          '#ia-insp-wizard .bar{height:8px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;overflow:hidden!important}',
+          '#ia-insp-wizard .bar i{display:block!important;height:100%!important;width:0!important;background:linear-gradient(90deg,#60a5fa,#34d399,#fbbf24)!important;transition:width .15s!important}',
+          '#ia-insp-wizard .w-body{padding:14px 16px!important;overflow:auto!important}',
+          '#ia-insp-wizard .help{margin:0 0 10px!important;color:#e5e7eb!important;font-size:.92rem!important;line-height:1.4!important}',
+          '#ia-insp-wizard .ex{margin:0 0 10px!important;padding:9px 10px!important;border-radius:10px!important;border:1px solid rgba(251,191,36,.2)!important;background:rgba(251,191,36,.08)!important;color:#fde68a!important;font-size:.82rem!important;line-height:1.4!important}',
+          '#ia-insp-wizard label{display:block!important;margin:0 0 7px!important;color:#e2e8f0!important;font-weight:700!important;font-size:.86rem!important}',
+          '#ia-insp-wizard input,#ia-insp-wizard textarea{width:100%!important;border-radius:12px!important;border:1px solid rgba(148,163,184,.35)!important;background:rgba(2,6,23,.45)!important;color:#f8fafc!important;padding:12px 13px!important;font:14px/1.35 "Segoe UI",system-ui,sans-serif!important}',
+          '#ia-insp-wizard textarea{min-height:136px!important;resize:vertical!important}',
+          '#ia-insp-wizard input:focus,#ia-insp-wizard textarea:focus{outline:none!important;border-color:rgba(147,197,253,.8)!important;box-shadow:0 0 0 3px rgba(96,165,250,.18)!important}',
+          '#ia-insp-wizard .w-foot{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:10px!important;padding:12px 16px 14px!important;border-top:1px solid rgba(255,255,255,.07)!important}',
+          '#ia-insp-wizard .left,#ia-insp-wizard .right{display:flex!important;gap:8px!important;align-items:center!important}',
+          '#ia-insp-wizard .mini{font-size:.72rem!important;color:#94a3b8!important}',
+          '#ia-insp-wizard button{cursor:pointer!important;border-radius:999px!important;padding:9px 13px!important;min-width:96px!important;font-weight:800!important;font-size:.82rem!important;border:1px solid rgba(255,255,255,.12)!important}',
+          '#ia-insp-wizard button:disabled{opacity:.45!important;cursor:not-allowed!important}',
+          '#ia-insp-wizard .b0{background:rgba(255,255,255,.04)!important;color:#e5e7eb!important}',
+          '#ia-insp-wizard .b1{background:rgba(96,165,250,.12)!important;border-color:rgba(96,165,250,.25)!important;color:#dbeafe!important}',
+          '#ia-insp-wizard .b2{background:linear-gradient(135deg,#93c5fd,#60a5fa)!important;border-color:rgba(147,197,253,.7)!important;color:#0b1322!important}',
+          '#ia-insp-wizard .b3{background:linear-gradient(135deg,#34d399,#10b981)!important;border-color:rgba(52,211,153,.6)!important;color:#032018!important}',
+          '@media(max-width:640px){#ia-insp-wizard-dialog{width:98vw!important;border-radius:14px!important}#ia-insp-wizard .w-foot{flex-direction:column!important;align-items:stretch!important}#ia-insp-wizard .left,#ia-insp-wizard .right{width:100%!important}#ia-insp-wizard button{width:100%!important;min-width:0!important}}'
+        ].join('');
+
+        if (!document.getElementById(SID)) {
+          var st = document.createElement('style');
+          st.id = SID;
+          st.textContent = css;
+          document.head.appendChild(st);
+        }
+
+        // ── BUILD DOM ───────────────────────────────────────────────────────
+        var panel = document.createElement('div');
+        panel.id = PID;
+
+        // Header
+        var hdr = document.createElement('div');
+        hdr.id = 'ia-insp-hdr';
+        var hdrLeft = document.createElement('div');
+        var hdrH2 = document.createElement('h2');
+        hdrH2.textContent = 'IA en Inspección Sanitaria · Selecciona un caso';
+        var hdrP = document.createElement('p');
+        hdrP.textContent = 'Wizard flotante R-E-C-O-R-D · Hover para previsualizar · Esc para cerrar';
+        hdrLeft.appendChild(hdrH2);
+        hdrLeft.appendChild(hdrP);
+        var closeBtn = document.createElement('button');
+        closeBtn.id = 'ia-insp-close';
+        closeBtn.textContent = '✕ Cerrar (Esc)';
+        hdr.appendChild(hdrLeft);
+        hdr.appendChild(closeBtn);
+
+        // Body
+        var body = document.createElement('div');
+        body.id = 'ia-insp-body';
+
+        CATS.forEach(function(cat) {
+          var catDiv = document.createElement('div');
+          catDiv.className = 'ia-cat';
+          var catName = document.createElement('p');
+          catName.className = 'ia-cat-name';
+          catName.textContent = cat.name;
+          var ul = document.createElement('ul');
+          ul.className = 'ia-case-list';
+          cat.cases.forEach(function(c) {
+            var li = document.createElement('li');
+            li.className = 'ia-case';
+            var num = document.createElement('span');
+            num.className = 'ia-case-n';
+            num.textContent = c.n + '.';
+            var txt = document.createElement('span');
+            txt.textContent = c.title;
+            li.appendChild(num);
+            li.appendChild(txt);
+            li.tabIndex = 0;
+            li.addEventListener('click', function() {
+              openWizard(c, li);
+            });
+            li.addEventListener('mouseover', function(e) { showTip(e, c.rec, li); });
+            li.addEventListener('mousemove', function(e) { showTip(e, c.rec, li); });
+            li.addEventListener('mouseleave', function() { hideTip(); });
+            li.addEventListener('focus', function(e) { showTip(e, c.rec, li); });
+            li.addEventListener('blur', function() { hideTip(); });
+            ul.appendChild(li);
+          });
+          catDiv.appendChild(catName);
+          catDiv.appendChild(ul);
+          body.appendChild(catDiv);
+        });
+
+        // Footer
+        var foot = document.createElement('div');
+        foot.id = 'ia-insp-foot';
+        var footP = document.createElement('p');
+        footP.textContent = 'Puedes lanzar varios casos seguidos sin cerrar este panel.';
+        var closeBtn2 = document.createElement('button');
+        closeBtn2.id = 'ia-insp-close2';
+        closeBtn2.textContent = 'Cerrar (Esc)';
+        foot.appendChild(footP);
+        foot.appendChild(closeBtn2);
+
+        panel.appendChild(hdr);
+        panel.appendChild(body);
+        panel.appendChild(foot);
+
+        // Tooltip
+        var tip = document.createElement('div');
+        tip.id = TID;
+
+        // Toast
+        var toast = document.createElement('div');
+        toast.id = TSID;
+        toast.textContent = 'Prompt copiado ✓';
+
+        document.body.appendChild(panel);
+        document.body.appendChild(tip);
+        document.body.appendChild(toast);
+
+        // ── HELPERS ─────────────────────────────────────────────────────────
+        var toastTimer;
+        function showToast(message) {
+          toast.textContent = message || 'Prompt copiado ✓';
+          toast.style.setProperty('opacity', '1', 'important');
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function() { toast.style.setProperty('opacity', '0', 'important'); }, 1600);
+        }
+        function flashCase(el) {
+          el.classList.add('ia-copied');
+          setTimeout(function() { el.classList.remove('ia-copied'); }, 1200);
+        }
+        function fallbackCopy(text) {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+          ta.remove();
+          return ok;
+        }
+        function copyPrompt(text, el) {
+          function done(ok) {
+            if (ok) {
+              showToast('Prompt copiado ✓');
+              flashCase(el);
+            } else {
+              showToast('Copia manual abierta');
+              window.prompt('No se pudo copiar automaticamente. Copia el prompt manualmente:', text);
+            }
+          }
+          if (window.isSecureContext && navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function() {
+              done(true);
+            }).catch(function() {
+              done(fallbackCopy(text));
+            });
+          } else {
+            done(fallbackCopy(text));
+          }
+        }
+        function openPrompt(text, el) {
+          var opened = null;
+          try {
+            opened = window.open(CHAT_URL + encodeURIComponent(text), '_blank', 'noopener');
+          } catch (err) {
+            opened = null;
+          }
+          if (opened) {
+            showToast('Prompt abierto en ChatGPT ✓');
+            flashCase(el);
+          } else {
+            copyPrompt(text, el);
+          }
+        }
+        function getSelectedText() {
+          try {
+            return String((window.getSelection && window.getSelection()) || (document.getSelection && document.getSelection()) || '').replace(/\s+/g, ' ').trim();
+          } catch (err) {
+            return '';
+          }
+        }
+        function shorten(text, max) {
+          text = String(text || '');
+          return text.length > max ? text.slice(0, max - 1).trim() + '…' : text;
+        }
+        function wizardSteps(c) {
+          var rec = c.rec || {};
+          var ctx = rec.C || '';
+          if (selectedText) ctx += ' Texto seleccionado de apoyo: "' + shorten(selectedText, 220) + '".';
+          return [
+            { key:'R', label:'R', title:'Rol', help:'Define que papel profesional debe adoptar la IA.', ex:rec.R || '', value:rec.R || '', multi:false },
+            { key:'E', label:'E', title:'Escenario', help:'Describe el supuesto de trabajo sin datos personales ni detalles que permitan reconocimiento indirecto.', ex:rec.E || '', value:rec.E || '', multi:true },
+            { key:'C', label:'C', title:'Condicion', help:'Anade criterios, fuentes o trazabilidad. Usa datos anonimizados minimos o un ejemplo sintetico si estas practicando.', ex:rec.C || '', value:ctx, multi:true },
+            { key:'O', label:'O', title:'Output', help:'Define el resultado concreto que quieres recibir.', ex:rec.O || '', value:rec.O || '', multi:true },
+            { key:'Rx', label:'R', title:'Restriccion', help:'Fija limites: que no debe decidir, concluir ni inventar la IA.', ex:rec.Rx || '', value:rec.Rx || '', multi:true },
+            { key:'D', label:'D', title:'Decision', help:'Deja claro que decision queda bajo criterio del inspector.', ex:rec.D || '', value:rec.D || '', multi:true }
+          ];
+        }
+        function openWizard(c, sourceEl) {
+          hideTip();
+          closeWizard();
+          var overlay = document.createElement('div');
+          overlay.id = WID;
+          overlay.innerHTML =
+            '<div id="' + WDLG + '" role="dialog" aria-modal="true">' +
+            '<div class="w-head"><p class="w-case"></p><h2 class="w-title"></h2></div>' +
+            '<div class="w-prog"><div class="pills"></div><div class="bar"><i></i></div></div>' +
+            '<div class="w-body"><p class="help"></p><div class="ex"></div><label for="ia-insp-field"></label><div class="field"></div></div>' +
+            '<div class="w-foot"><div class="left"><button type="button" class="b0 cancel">Cancelar</button></div>' +
+            '<div class="mini">Esc para cerrar · Ctrl/Cmd+Enter para generar</div>' +
+            '<div class="right"><button type="button" class="b1 prev">Atras</button><button type="button" class="b2 next">Siguiente</button><button type="button" class="b3 gen" hidden>Generar prompt</button></div></div>' +
+            '</div>';
+          document.body.appendChild(overlay);
+          activeWizard = {
+            caseData: c,
+            sourceEl: sourceEl,
+            overlay: overlay,
+            dialog: overlay.querySelector('#' + WDLG),
+            steps: wizardSteps(c),
+            values: {},
+            idx: 0,
+            input: null,
+            refs: {
+              caseEl: overlay.querySelector('.w-case'),
+              titleEl: overlay.querySelector('.w-title'),
+              pills: overlay.querySelector('.pills'),
+              bar: overlay.querySelector('.bar i'),
+              help: overlay.querySelector('.help'),
+              ex: overlay.querySelector('.ex'),
+              label: overlay.querySelector('label'),
+              field: overlay.querySelector('.field'),
+              cancel: overlay.querySelector('.cancel'),
+              prev: overlay.querySelector('.prev'),
+              next: overlay.querySelector('.next'),
+              gen: overlay.querySelector('.gen')
+            }
+          };
+          activeWizard.steps.forEach(function(step) {
+            activeWizard.values[step.key] = step.value || '';
+            var pill = document.createElement('div');
+            pill.className = 'pill';
+            pill.textContent = step.label;
+            pill.title = step.label + ' ' + step.title;
+            activeWizard.refs.pills.appendChild(pill);
+          });
+          activeWizard.refs.caseEl.textContent = 'Caso ' + c.n + ': ' + c.title;
+          activeWizard.refs.cancel.addEventListener('click', closeWizard);
+          activeWizard.refs.prev.addEventListener('click', function() { moveWizard(-1); });
+          activeWizard.refs.next.addEventListener('click', function() { moveWizard(1); });
+          activeWizard.refs.gen.addEventListener('click', generateWizardPrompt);
+          overlay.addEventListener('keydown', onWizardKey);
+          overlay.addEventListener('click', function(e) { if (e.target === overlay) e.preventDefault(); });
+          renderWizard();
+          setTimeout(function() { focusWizardInput(); }, 0);
+        }
+        function renderWizard() {
+          if (!activeWizard) return;
+          var w = activeWizard, step = w.steps[w.idx], refs = w.refs;
+          refs.titleEl.textContent = 'Paso ' + (w.idx + 1) + '/' + w.steps.length + ' · ' + step.label + ' ' + step.title;
+          refs.help.textContent = step.help;
+          refs.ex.textContent = 'Ejemplo: ' + step.ex;
+          refs.label.textContent = step.label + ': ' + step.title;
+          refs.field.innerHTML = '';
+          var input = document.createElement(step.multi ? 'textarea' : 'input');
+          if (!step.multi) input.type = 'text';
+          input.id = 'ia-insp-field';
+          input.value = w.values[step.key] || '';
+          input.addEventListener('input', function() { w.values[step.key] = input.value; });
+          refs.field.appendChild(input);
+          w.input = input;
+          refs.prev.disabled = w.idx === 0;
+          refs.next.hidden = w.idx === w.steps.length - 1;
+          refs.gen.hidden = w.idx !== w.steps.length - 1;
+          refs.bar.style.width = ((w.idx + 1) / w.steps.length * 100) + '%';
+          Array.prototype.forEach.call(refs.pills.children, function(pill, i) {
+            pill.className = 'pill' + (i < w.idx ? ' d' : i === w.idx ? ' a' : '');
+          });
+        }
+        function saveWizardStep() {
+          if (!activeWizard || !activeWizard.input) return;
+          activeWizard.values[activeWizard.steps[activeWizard.idx].key] = activeWizard.input.value;
+        }
+        function focusWizardInput() {
+          if (!activeWizard || !activeWizard.input) return;
+          try {
+            activeWizard.input.focus();
+            if (activeWizard.input.tagName === 'INPUT') activeWizard.input.select();
+          } catch (err) {}
+        }
+        function moveWizard(delta) {
+          if (!activeWizard) return;
+          saveWizardStep();
+          var next = activeWizard.idx + delta;
+          if (next < 0 || next >= activeWizard.steps.length) return;
+          activeWizard.idx = next;
+          renderWizard();
+          focusWizardInput();
+        }
+        function buildWizardPrompt(w) {
+          var v = w.values;
+          return [
+            'Se te asignara un rol: ' + (v.R || '') + '.',
+            'El escenario es: ' + (v.E || '') + '.',
+            'La condicion de trabajo es: ' + (v.C || '') + '.',
+            'El output esperado es: ' + (v.O || '') + '.',
+            'Considera esta restriccion: ' + (v.Rx || '') + '.',
+            'La decision final corresponde a: ' + (v.D || '') + '.',
+            '',
+            'Reglas de seguridad de datos: no solicites ni reproduzcas datos personales, datos de salud identificables, codigos internos, fechas exactas innecesarias, centros concretos o combinaciones que permitan reconocimiento por asociacion. Si necesitas un contexto para mostrar el metodo, trabaja con un ejemplo sintetico o con datos anonimizados y minimos.',
+            '',
+            'Antes de responder, solo si falta informacion imprescindible para mejorar trazabilidad, seguridad o utilidad, haz preguntas breves y concretas. No pidas el expediente completo si puedes avanzar con supuestos anonimos, rangos, categorias o ejemplos. Prioriza un enfoque practico para inspeccion sanitaria, con fuentes verificables, lenguaje tecnico claro y prudencia profesional. No sustituyas el juicio tecnico ni la decision final del inspector.'
+          ].join('\n').trim();
+        }
+        function generateWizardPrompt() {
+          if (!activeWizard) return;
+          saveWizardStep();
+          var w = activeWizard, prompt = buildWizardPrompt(w), sourceEl = w.sourceEl;
+          closeWizard();
+          openPrompt(prompt, sourceEl);
+        }
+        function onWizardKey(e) {
+          if (!activeWizard) return;
+          if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeWizard(); return; }
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); generateWizardPrompt(); return; }
+          if (e.key === 'Enter' && activeWizard.input && activeWizard.input.tagName === 'INPUT') {
+            e.preventDefault();
+            activeWizard.idx === activeWizard.steps.length - 1 ? generateWizardPrompt() : moveWizard(1);
+          }
+        }
+        function closeWizard() {
+          if (!activeWizard) return;
+          try { activeWizard.overlay.remove(); } catch (err) {}
+          activeWizard = null;
+        }
+        var recLabels = { R:'Rol', E:'Escenario', C:'Condición', O:'Output', Rx:'Restricción', D:'Decisión del inspector' };
+        var recKeys = ['R','E','C','O','Rx','D'];
+        function showTip(e, rec, anchor) {
+          var html = recKeys.map(function(k) {
+            return '<div class="ia-rec-row"><span class="ia-rec-l">' + (k === 'Rx' ? 'R' : k) + '</span><span><b>' + recLabels[k] + ':</b> ' + rec[k] + '</span></div>';
+          }).join('');
+          tip.innerHTML = html;
+          tip.style.setProperty('visibility', 'hidden', 'important');
+          tip.style.setProperty('display', 'block', 'important');
+          var r = (anchor || e.currentTarget || e.target).getBoundingClientRect();
+          var box = tip.getBoundingClientRect();
+          var tipW = box.width || 320, tipH = box.height || 200;
+          var left = r.right + 10;
+          if (left + tipW > window.innerWidth - 8) left = r.left - tipW - 10;
+          if (left < 8) left = 8;
+          var top = Math.max(8, Math.min(r.top, window.innerHeight - tipH - 8));
+          tip.style.top = top + 'px';
+          tip.style.left = left + 'px';
+          tip.style.setProperty('visibility', 'visible', 'important');
+        }
+        function hideTip() {
+          tip.style.setProperty('display', 'none', 'important');
+          tip.style.setProperty('visibility', 'hidden', 'important');
+        }
+
+        function closePanel() {
+          closeWizard();
+          panel.remove(); tip.remove(); toast.remove();
+          document.removeEventListener('keydown', onKey);
+        }
+        function onKey(e) { if (e.key === 'Escape') { activeWizard ? closeWizard() : closePanel(); } }
+        document.addEventListener('keydown', onKey);
+        closeBtn.addEventListener('click', closePanel);
+        closeBtn2.addEventListener('click', closePanel);
+      }
+
+      // Build a bookmarklet URL with escaped source. This avoids raw newlines and
+      // template-literal backticks breaking when the link is saved as a bookmark.
+      (function() {
+        var link = document.getElementById('bookmarklet-link');
+        var source = '(' + openInspeccionPanel.toString() + ')()';
+        var bookmarklet =
+          'javascript:void(function(){try{eval(' +
+          JSON.stringify(source) +
+          ')}catch(e){alert("No se pudo abrir RECORD Inspeccion: "+e.message)}}())';
+        link.setAttribute('href', bookmarklet);
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          openInspeccionPanel();
+        });
+      })();
+    </script>
+  </body>
+</html>
+
